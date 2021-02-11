@@ -210,21 +210,26 @@ function toNdjson(data) {
  */
 async function sendAllPubsubMsgs(ids) {
     const promises = ids.map(async(id) => {
-        const timeout = Math.floor(Math.random() * Math.floor(30000));
-        new Promise(resolve =>
-            setTimeout(() => {
-                const msg = Buffer.from(id);
-                log(`${id}: Sending init PubSub message`);
-                await pubsub
-                    .topic(config.pubsubTopicId)
-                    .publisher()
-                    .publish(msg);
-                log(`${id}: Init PubSub message sent`)
-                resolve()
-            }, timeout))
-    });
+        new Promise(resolve => {
+            const delayTime = Math.floor(Math.random() * Math.floor(30000));
+            log(`${id}: Delay Time ${delayTime}`);
+            await timeout(delayTime);
 
-    return Promise.all(promises)
+            const msg = Buffer.from(id);
+            log(`${id}: Sending init PubSub message`);
+            await pubsub
+                .topic(config.pubsubTopicId)
+                .publisher()
+                .publish(msg);
+            log(`${id}: Init PubSub message sent`);
+            resolve();
+        });
+        return Promise.all(promises);
+    })
+}
+
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -323,7 +328,7 @@ async function launchLighthouse(event, callback) {
         // If the Pub/Sub message is not valid
         if (msg !== 'all' && !ids.includes(msg)) { return console.error('No valid message found!'); }
 
-        if (msg === 'all') { return sendAllPubsubMsgs(ids); }
+        if (msg === 'all') { return await sendAllPubsubMsgs(ids); }
 
         const [src] = source.filter(obj => obj.id === msg);
         const id = src.id;
