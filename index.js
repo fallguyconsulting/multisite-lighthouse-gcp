@@ -37,6 +37,7 @@ const { Storage } = require(`@google-cloud/storage`);
 const bqSchema = require(`./bigquery-schema.json`);
 const config = require(`./config.json`);
 const configSchema = require(`./config.schema.json`);
+const { time } = require("console");
 
 // Make filesystem write work with async/await
 const writeFile = promisify(fs.writeFile);
@@ -209,25 +210,25 @@ function toNdjson(data) {
  * @returns {Promise<any[]>} Resolved promise when all IDs have been published.
  */
 async function sendAllPubsubMsgs(ids) {
-    const promises = ids.map(async(id) => {
-        new Promise(resolve => {
-            const delayTime = Math.floor(Math.random() * Math.floor(30000));
-            log(`${id}: Delay Time ${delayTime}`);
-            await timeout(delayTime);
+    for (let id of ids) {
+        const delayTime = Math.floor(Math.random() * Math.floor(10000));
+        await timeout(delayTime);
 
-            const msg = Buffer.from(id);
-            log(`${id}: Sending init PubSub message`);
-            await pubsub
-                .topic(config.pubsubTopicId)
-                .publisher()
-                .publish(msg);
-            log(`${id}: Init PubSub message sent`);
-            resolve();
-        });
-        return Promise.all(promises);
-    })
+        const msg = Buffer.from(id);
+        log(`${id}: Sending init PubSub message`);
+        await pubsub
+            .topic(config.pubsubTopicId)
+            .publisher()
+            .publish(msg);
+        log(`${id}: Init PubSub message sent`);
+    }
 }
 
+/**
+ * Delay Pubsub between urls to not overload BigQuery quota interts in 10 secdonds
+ *
+ * @param {number} ms random trigger time for sendAllPubsubMsgs
+ */
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -328,7 +329,7 @@ async function launchLighthouse(event, callback) {
         // If the Pub/Sub message is not valid
         if (msg !== 'all' && !ids.includes(msg)) { return console.error('No valid message found!'); }
 
-        if (msg === 'all') { return await sendAllPubsubMsgs(ids); }
+        if (msg === 'all') { await sendAllPubsubMsgs(ids); }
 
         const [src] = source.filter(obj => obj.id === msg);
         const id = src.id;

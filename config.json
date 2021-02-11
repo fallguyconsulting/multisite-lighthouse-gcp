@@ -1,0 +1,102 @@
+{
+    "source": [{
+            "url": "https://www.accountingedu.org",
+            "id": "accountingedu"
+        },
+        {
+            "url": "https://www.addiction-counselors.com",
+            "id": "addiction-counselors"
+        },
+        {
+            "url": "https://www.humanservicesedu.org",
+            "id": "humanservicesedu"
+        },
+        {
+            "url": "https://www.medicalassistantschools.com",
+            "id": "medicalassistantschools"
+        },
+        {
+            "url": "https://www.ultrasoundtechnicianschools.com",
+            "id": "ultrasoundtechnicianschools"
+        },
+        {
+            "url": "https://www.allaccountingcareers.com",
+            "id": "allaccountingcareers"
+        },
+        {
+            "url": "https://www.rntomsn.com",
+            "id": "rntomsn"
+        },
+        {
+            "url": "https://www.lawyeredu.org",
+            "id": "lawyeredu"
+        },
+        {
+            "url": "https://www.nutritioned.org",
+            "id": "nutritioned"
+        },
+        {
+            "url": "https://www.nursinglicensure.org",
+            "id": "nursinglicensure"
+        },
+        {
+            "url": "https://www.massagetherapylicense.org",
+            "id": "massagetherapylicense"
+        },
+        {
+            "url": "https://www.mft-license.com",
+            "id": "mft-license"
+        },
+        {
+            "url": "https://www.psychologist-license.com",
+            "id": "psychologist-license"
+        },
+        {
+            "url": "https://www.securityguard-license.org",
+            "id": "securityguard-license"
+        },
+        {
+            "url": "https://www.school-counselor.org",
+            "id": "school-counselor"
+        },
+        {
+            "url": "https://www.school-psychologists.com",
+            "id": "school-psychologists"
+        },
+        {
+            "url": "https://www.education-colleges.com",
+            "id": "education-colleges"
+        },
+        {
+            "url": "https://www.nursing-school-degrees.com",
+            "id": "nursing-school-degrees"
+        },
+        {
+            "url": "https://www.mentalhealthcounselorlicense.com",
+            "id": "mentalhealthcounselorlicense"
+        },
+        {
+            "url": "https://www.criminaljusticeschoolinfo.com",
+            "id": "criminaljusticeschoolinfo"
+        },
+        {
+            "url": "https://www.bestnursingmasters.com",
+            "id": "bestnursingmasters"
+        },
+        {
+            "url": "https://www.appliedbehavioranalysisedu.org/",
+            "id": "appliedbehavioranalysisedu"
+        }
+    ],
+    "projectId": "xyz-lighthouse-dashboard",
+    "pubsubTopicId": "launch-lighthouse",
+    "datasetId": "lighthouse",
+    "minTimeBetweenTriggers": 300000,
+    "gcs": {
+        "bucketName": "xyz-lighthouse-reports"
+    },
+    "lighthouseFlags": {
+        "output": ["csv"],
+        "emulatedFormFactor": "mobile"
+    }
+}
