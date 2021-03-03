@@ -96,7 +96,6 @@
         "bucketName": "xyz-lighthouse-reports"
     },
     "lighthouseFlags": {
-        "output": ["csv"],
-        "emulatedFormFactor": "mobile"
+        "output": ["json"]
     }
 }

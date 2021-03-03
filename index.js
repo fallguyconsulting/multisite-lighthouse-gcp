@@ -37,7 +37,6 @@ const { Storage } = require(`@google-cloud/storage`);
 const bqSchema = require(`./bigquery-schema.json`);
 const config = require(`./config.json`);
 const configSchema = require(`./config.schema.json`);
-const { time } = require("console");
 
 // Make filesystem write work with async/await
 const writeFile = promisify(fs.writeFile);
@@ -103,13 +102,12 @@ function createJSON(obj, id) {
         site_url: obj.finalUrl,
         site_id: id,
         user_agent: obj.userAgent,
-        emulated_as: obj.configSettings.emulatedFormFactor,
         accessibility: [{
             total_score: obj.categories.accessibility.score,
             bypass_repetitive_content: obj.audits.bypass.score === 1,
             color_contrast: obj.audits['color-contrast'].score === 1,
             document_title_found: obj.audits['document-title'].score === 1,
-            no_duplicate_id_attribute: obj.audits['duplicate-id'].score === 1,
+            no_duplicate_id_attribute: obj.audits['duplicate-id-active'].score === 1,
             html_has_lang_attribute: obj.audits['html-has-lang'].score === 1,
             html_lang_is_valid: obj.audits['html-lang-valid'].score === 1,
             images_have_alt_attribute: obj.audits['image-alt'].score === 1,
@@ -139,36 +137,33 @@ function createJSON(obj, id) {
         performance: [{
             total_score: obj.categories.performance.score,
             first_contentful_paint: [{
-                raw_value: obj.audits['first-contentful-paint'].rawValue,
+                raw_value: obj.audits['first-contentful-paint'].numericValue,
                 score: obj.audits['first-contentful-paint'].score
             }],
             first_meaningful_paint: [{
-                raw_value: obj.audits['first-meaningful-paint'].rawValue,
+                raw_value: obj.audits['first-meaningful-paint'].numericValue,
                 score: obj.audits['first-meaningful-paint'].score
             }],
             speed_index: [{
-                raw_value: obj.audits['speed-index'].rawValue,
+                raw_value: obj.audits['speed-index'].numericValue,
                 score: obj.audits['speed-index'].score
             }],
             page_interactive: [{
-                raw_value: obj.audits.interactive.rawValue,
+                raw_value: obj.audits.interactive.numericValue,
                 score: obj.audits.interactive.score
             }],
             first_cpu_idle: [{
-                raw_value: obj.audits['first-cpu-idle'].rawValue,
+                raw_value: obj.audits['first-cpu-idle'].numericValue,
                 score: obj.audits['first-cpu-idle'].score
             }]
         }],
         pwa: [{
             total_score: obj.categories.pwa.score,
-            load_fast_enough: obj.audits['load-fast-enough-for-pwa'].score === 1,
-            works_offline: obj.audits['works-offline'].score === 1,
             installable_manifest: obj.audits['installable-manifest'].score === 1,
             uses_https: obj.audits['is-on-https'].score === 1,
             redirects_http_to_https: obj.audits['redirects-http'].score === 1,
             has_meta_viewport: obj.audits.viewport.score === 1,
             uses_service_worker: obj.audits['service-worker'].score === 1,
-            works_without_javascript: obj.audits['without-javascript'].score === 1,
             splash_screen_found: obj.audits['splash-screen'].score === 1,
             themed_address_bar: obj.audits['themed-omnibox'].score === 1
         }],
@@ -218,7 +213,6 @@ async function sendAllPubsubMsgs(ids) {
         log(`${id}: Sending init PubSub message`);
         await pubsub
             .topic(config.pubsubTopicId)
-            .publisher()
             .publish(msg);
         log(`${id}: Init PubSub message sent`);
     }
@@ -315,7 +309,6 @@ async function checkEventState(id, timeNow) {
  */
 async function launchLighthouse(event, callback) {
     try {
-
         const source = config.source;
         const msg = Buffer.from(event.data, 'base64').toString();
         const ids = source.map(obj => obj.id);
@@ -332,6 +325,11 @@ async function launchLighthouse(event, callback) {
         if (msg === 'all') { await sendAllPubsubMsgs(ids); }
 
         const [src] = source.filter(obj => obj.id === msg);
+
+        if (src === undefined) {
+            return;
+        }
+
         const id = src.id;
         const url = src.url;
 
